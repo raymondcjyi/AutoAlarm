@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Auto Alarm</title>
+
+</head>
+<body>
+<h1> Auto Alarm <input type = "number" id="interval">mins</h1>
+<div class="clock" id="clock"></div>
+<div class = "alarm" id = "alarm">
+  <input id="alarmTime">
+  <button onclick="setAlarm()">Set Alarm</button>
+</div>
+
+<div id="next-alarm"></div>
+
+<p> Tip: To pause or reset, just refresh the html app </P>
+<script>
+var audioCtx = new (window.AudioContext || window.webkitAudioContext)(); // Create audio context
+
+updateClock();
+// Call updateClock function every second
+setInterval(updateClock, 1000);
+
+function updateClock() {
+
+  var alarmTime = document.getElementById('alarmTime').value;  
+
+  var now = new Date();
+  var hours = now.getHours();
+  var minutes = now.getMinutes();
+  var seconds = now.getSeconds();
+
+
+  // Add leading zeros to minutes and seconds if necessary
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  seconds = seconds < 10 ? '0' + seconds : seconds;
+
+  //Update the clock display
+  var currentTime = hours + ':' + minutes + ':' + seconds;
+  document.getElementById('clock').textContent = "Current Time: " + currentTime;
+
+  if (alarmTime == currentTime) {
+	triggerAlarm();
+    
+  }
+}
+
+function setAlarm(){
+	var alarmTime = document.getElementById('alarmTime').value;
+	if (alarmTime == null || alarmTime == "")
+	{
+		var now = new Date();
+    var nextAlarmTime = new Date(now.getTime() + (document.getElementById("interval").value * 60000)); // Calculate next alarm time 22s later
+    document.getElementById('alarmTime').value = nextAlarmTime.getHours() + ':' + 
+                                            String(nextAlarmTime.getMinutes()).padStart(2, '0') + ':' + 
+                                            String(nextAlarmTime.getSeconds()).padStart(2, '0');
+    document.getElementById('next-alarm').textContent = "Next Alarm: " + document.getElementById('alarmTime').value;
+
+	}else
+	{
+		document.getElementById('next-alarm').textContent = "Next Alarm: " + alarmTime
+	}
+ 
+}
+
+function triggerAlarm()
+{
+    playBeep(); // Play beep sound
+    beepInterval = setInterval(playBeep, 1000);
+    document.getElementById('alarm').innerHTML += '<button onclick="stopAlarm()">Stop Alarm</button>'; // Add button to stop alarm
+    
+}
+
+function stopAlarm() {
+  clearInterval(beepInterval)
+  var now = new Date();
+  document.getElementById('alarm').innerHTML = '<input id="alarmTime"><button onclick="setAlarm()">Set Alarm</button>'; // Reset alarm input field and button
+  var nextAlarmTime = new Date(now.getTime() + (document.getElementById("interval").value * 60000)); // Calculate next alarm time 22s later
+  document.getElementById('alarmTime').value = nextAlarmTime.getHours() + ':' + 
+                                              String(nextAlarmTime.getMinutes()).padStart(2, '0') + ':' + 
+                                              String(nextAlarmTime.getSeconds()).padStart(2, '0');
+  document.getElementById('next-alarm').textContent = "Next Alarm: " + document.getElementById('alarmTime').value;
+}
+
+function playBeep() {
+  var oscillator = audioCtx.createOscillator(); // Create oscillator node
+  oscillator.type = 'sine'; // Set oscillator type to sine wave
+  oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // Set frequency to 1000 Hz
+  oscillator.connect(audioCtx.destination); // Connect oscillator to audio output
+  oscillator.start(); // Start oscillator
+  setTimeout(function() {
+    oscillator.stop(); // Stop oscillator after 500 ms
+  }, 500);
+}
+
+</script>
+
+</body>
+</html>
