@@ -1,3 +1,6 @@
+# Add necessary .NET assembly for Windows Forms (for Pop up alert)
+Add-Type -AssemblyName System.Windows.Forms
+
 function ContinuousBeep {
     while ($true) {
         [console]::Beep()
@@ -11,6 +14,7 @@ while ($true) {
     
     while ($Alarm) {
   	$beepJob = Start-Job -ScriptBlock ${function:ContinuousBeep}
+	[System.Windows.Forms.MessageBox]::Show("Alarm pop-up alert!", "Alarm")
         $intervalSeconds = Read-Host "Enter new time interval in seconds (or 'exit' to stop)"
         if ($null -eq $intervalSeconds) {
         	continue
